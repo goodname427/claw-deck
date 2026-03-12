@@ -62,6 +62,35 @@ pnpm build
 
 ## Install
 
+### Method 1: Developer Mode (Recommended for Development)
+
+1. **Package the plugin**
+
+   ```bash
+   # Linux / macOS / SteamOS
+   chmod +x package.sh
+   ./package.sh
+
+   # Windows (PowerShell)
+   .\package.ps1
+   ```
+
+   This builds the frontend and outputs `out/ClawDeck.zip`.
+
+2. **Transfer** `ClawDeck.zip` to your Steam Deck (USB drive, SCP, SMB, etc.)
+
+3. **Install on Steam Deck**
+   - Switch to **Game Mode**
+   - Open **Quick Access Menu** (press `...` button)
+   - Go to the **Decky Loader** tab (plug icon)
+   - Open Decky **Settings** (gear icon)
+   - Enable **Developer Mode**
+   - Click **"Install Plugin From ZIP"**
+   - Select `ClawDeck.zip`
+   - Done! The plugin appears in the Decky sidebar.
+
+### Method 2: Manual Copy
+
 Copy the entire `ClawDeck/` directory (with `dist/`, `main.py`, `py_modules/`, `defaults/`, `plugin.json`) to:
 
 ```
