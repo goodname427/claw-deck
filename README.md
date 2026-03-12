@@ -8,9 +8,14 @@ OpenClaw AI Assistant plugin for Steam Deck, powered by [Decky Loader](https://g
 
 - 🤖 Sidebar chat panel integrated into Decky Loader
 - 🔗 Connect to OpenClaw Gateway via HTTP REST API
+- 🌊 WebSocket streaming with token-by-token rendering
+- 🔄 Auto-reconnect with exponential backoff & heartbeat keep-alive
+- 🧩 Skill browser — view and trigger OpenClaw skills
 - ⚙️ Configurable Gateway address (HTTP / WebSocket)
-- 💬 Real-time connection status indicator
-- 🎮 Designed for Steam Deck gamepad & touchscreen interaction
+- 💬 Real-time connection status indicator with periodic polling
+- 🎮 Hotkey combo (Steam + QAM) to instantly open sidebar
+- 🎤 Voice input — tap-to-record with OpenClaw STT transcription
+- 🎨 SteamOS dark theme with centralized design tokens
 
 ## Project Structure
 
@@ -22,15 +27,21 @@ ClawDeck/
 ├── rollup.config.js             # Frontend bundler config
 ├── main.py                      # Python backend entry point
 ├── py_modules/
-│   └── openclaw_client.py       # OpenClaw HTTP client
+│   ├── openclaw_client.py       # OpenClaw HTTP + WebSocket client
+│   ├── hotkey_listener.py       # Steam Deck button combo listener (evdev)
+│   └── voice_recorder.py        # Microphone capture + STT proxy
 ├── defaults/
 │   └── config.json              # Default configuration
 └── src/
-    ├── index.tsx                # Plugin entry point
+    ├── index.tsx                # Plugin entry point + hotkey polling
+    ├── styles/
+    │   └── theme.ts             # SteamOS dark theme design tokens
     └── components/
-        ├── ChatPanel.tsx        # Main chat interface
-        ├── MessageBubble.tsx    # Message bubble component
-        └── SettingsPanel.tsx    # Gateway settings panel
+        ├── ChatPanel.tsx        # Main chat interface (HTTP + streaming)
+        ├── MessageBubble.tsx    # Message bubble with streaming cursor
+        ├── SettingsPanel.tsx    # Gateway settings & WS controls
+        ├── SkillList.tsx        # Skill browser & trigger panel
+        └── VoiceButton.tsx      # Tap-to-record voice input button
 ```
 
 ## Prerequisites
@@ -66,7 +77,8 @@ Open the plugin sidebar → click **Settings** to configure:
 | Field | Default | Description |
 |-------|---------|-------------|
 | HTTP URL | `http://localhost:18789` | OpenClaw Gateway HTTP endpoint |
-| WebSocket URL | `ws://localhost:18789/ws` | OpenClaw Gateway WebSocket endpoint (reserved) |
+| WebSocket URL | `ws://localhost:18789/ws` | OpenClaw Gateway WebSocket endpoint |
+| Enable Streaming | `false` | Use WebSocket for token-by-token responses |
 
 Configuration is persisted to `~/homebrew/settings/ClawDeck/config.json`.
 
@@ -76,18 +88,27 @@ The Python backend exposes the following methods to the frontend via Decky's `ca
 
 | Method | Parameters | Returns | Description |
 |--------|-----------|---------|-------------|
-| `send_message` | `message: str, session_key?: str` | `{success, data/error}` | Send chat message to OpenClaw |
-| `check_connection` | — | `{connected: bool}` | Test Gateway connectivity |
-| `get_config` | — | `{http_url, ws_url}` | Get current config |
-| `set_config` | `http_url: str, ws_url: str` | `{success: bool}` | Update & persist config |
-| `clear_history` | — | `{success: bool}` | Acknowledge history clear |
+| `send_message` | `message: str, session_key?: str` | `{success, data/error}` | Send chat message via HTTP |
+| `send_message_stream` | `message: str, session_key?: str` | `{success, stream_id}` | Start WebSocket streaming |
+| `poll_stream` | `stream_id: str` | `{chunks, done, error}` | Poll streaming chunks |
+| `check_connection` | — | `{connected, ws_connected}` | Test Gateway + WS status |
+| `connect_websocket` | — | `{success, error?}` | Establish WS connection |
+| `disconnect_websocket` | — | `{success}` | Close WS connection |
+| `get_skills` | — | `{success, skills}` | List available OpenClaw skills |
+| `get_config` | — | `{http_url, ws_url, use_streaming}` | Get current config |
+| `set_config` | `http_url, ws_url, use_streaming` | `{success}` | Update & persist config |
+| `clear_history` | — | `{success}` | Acknowledge history clear |
+| `poll_hotkey` | — | `{triggered}` | Poll for hotkey combo trigger |
+| `voice_start` | — | `{success, error?}` | Start microphone recording |
+| `voice_stop` | — | `{success, text, error?}` | Stop recording & transcribe via STT |
+| `voice_status` | — | `{recording}` | Check if currently recording |
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Frontend | TypeScript, React (Steam SP_REACT), @decky/ui, @decky/api |
-| Backend | Python 3, stdlib urllib (zero external dependencies) |
+| Backend | Python 3, stdlib urllib + socket + struct (zero external dependencies) |
 | Bundler | Rollup |
 | Target | SteamOS 3.x (Arch Linux) |
 
