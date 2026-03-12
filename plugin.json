@@ -1,0 +1,10 @@
+{
+  "name": "ClawDeck",
+  "author": "ClawDeck",
+  "flags": ["root"],
+  "publish": {
+    "tags": ["utility", "ai"],
+    "description": "OpenClaw AI Assistant for Steam Deck",
+    "image": ""
+  }
+}

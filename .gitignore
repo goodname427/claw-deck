@@ -1,1 +1,36 @@
+# Devlopment
 .*/
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build output
+dist/
+out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+env/
+venv/
+
+# Plugin runtime
+settings/
+
+# Logs
+*.log
