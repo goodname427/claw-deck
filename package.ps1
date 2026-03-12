@@ -19,8 +19,21 @@ if (Test-Path $OUT_DIR) { Remove-Item -Recurse -Force $OUT_DIR }
 
 # 2. Build frontend
 Write-Host "[2/4] Building frontend..." -ForegroundColor Yellow
-pnpm install
-pnpm build
+
+# Auto-detect package manager
+$PM = $null
+if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+    $PM = "pnpm"
+} elseif (Get-Command npm -ErrorAction SilentlyContinue) {
+    $PM = "npm"
+} else {
+    Write-Host "ERROR: Neither pnpm nor npm found. Please install Node.js first." -ForegroundColor Red
+    exit 1
+}
+Write-Host "Using package manager: $PM" -ForegroundColor Gray
+
+& $PM install
+& $PM run build
 
 # 3. Stage files into plugin directory structure
 Write-Host "[3/4] Staging files..." -ForegroundColor Yellow

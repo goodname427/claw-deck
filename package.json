@@ -6,7 +6,7 @@
   "scripts": {
     "build": "shx rm -rf dist && rollup -c --silent",
     "watch": "rollup -c -w",
-    "package": "shx rm -rf out && pnpm build && shx mkdir -p out/ClawDeck && shx cp plugin.json out/ClawDeck/ && shx cp main.py out/ClawDeck/ && shx cp -r dist out/ClawDeck/ && shx cp -r py_modules out/ClawDeck/ && shx cp -r defaults out/ClawDeck/",
+"package": "shx rm -rf out && npm run build && shx mkdir -p out/ClawDeck && shx cp plugin.json out/ClawDeck/ && shx cp main.py out/ClawDeck/ && shx cp -r dist out/ClawDeck/ && shx cp -r py_modules out/ClawDeck/ && shx cp -r defaults out/ClawDeck/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

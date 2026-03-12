@@ -22,8 +22,20 @@ rm -rf "${OUT_DIR}"
 
 # 2. Build frontend
 echo "[2/4] Building frontend..."
-pnpm install --frozen-lockfile 2>/dev/null || pnpm install
-pnpm build
+
+# Auto-detect package manager
+if command -v pnpm &>/dev/null; then
+    PM="pnpm"
+elif command -v npm &>/dev/null; then
+    PM="npm"
+else
+    echo "ERROR: Neither pnpm nor npm found. Please install Node.js first."
+    exit 1
+fi
+echo "Using package manager: ${PM}"
+
+${PM} install
+${PM} run build
 
 # 3. Stage files into plugin directory structure
 echo "[3/4] Staging files..."
